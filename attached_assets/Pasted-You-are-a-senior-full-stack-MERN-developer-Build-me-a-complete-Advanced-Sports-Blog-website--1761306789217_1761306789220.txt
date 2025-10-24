@@ -1,0 +1,65 @@
+You are a senior full-stack MERN developer.
+
+Build me a complete **Advanced Sports Blog website** using the **MERN stack (MongoDB, Express, React, Node.js)**.
+
+### Project Description
+A modern, SEO-optimized sports blogging platform with multi-author support, editorial workflow, comments, tags, media uploads, and real-time sports features.
+
+### Functional Requirements
+1. **Authentication**
+   - JWT-based auth (access + refresh tokens)
+   - Role-based access: reader, author, editor, admin
+   - Password hashing (bcrypt)
+   - Auth routes: /register, /login, /refresh, /logout
+
+2. **Blog System**
+   - CRUD for posts (draft, review, publish)
+   - Tags, categories, featured posts
+   - Rich text editor (Markdown or WYSIWYG)
+   - Image upload via AWS S3 or Cloudinary (with signed URL)
+   - SEO fields (slug, meta description, OG tags)
+
+3. **Comments & Community**
+   - Nested comments with moderation
+   - Like, view count, and trending logic
+   - Anti-spam (rate limiting)
+
+4. **Profiles**
+   - Author profiles (bio, avatar)
+   - Team & player profiles (bio + stats)
+
+5. **Search & Discovery**
+   - Text search (MongoDB Atlas Search)
+   - Trending + related posts recommendation
+
+6. **Real-time & Live Features**
+   - Live commentary feed (Socket.io)
+   - Match widgets (scoreboard snippet)
+
+7. **Frontend (React + Tailwind)**
+   - Home page (featured & trending)
+   - Post page with comments
+   - Author dashboard for managing posts
+   - Admin dashboard for user & post management
+   - Responsive UI with dark mode
+
+8. **Deployment & DevOps**
+   - Dockerized backend + frontend + Mongo
+   - .env for secrets
+   - GitHub Actions CI pipeline for test + build + deploy
+
+### Technical Requirements
+- Backend: Node.js + Express + Mongoose
+- Frontend: React + Vite + Tailwind CSS
+- Realtime: Socket.io
+- Database: MongoDB (Atlas)
+- File uploads: S3 or Cloudinary
+- Testing: Jest + Supertest
+- Folder structure: `server/` and `client/` separated
+- Include minimal seed data for demo users & posts
+
+### Deliverables
+- Fully functional backend API with authentication and CRUD
+- React frontend connected via REST API
+- Ready-to-run Docker Compose setup (`docker-compose up`)
+- README with setup instructions and environment variables
