@@ -1,5 +1,5 @@
-import { storage } from "./storage";
-import { hashPassword } from "./auth";
+import { storage } from "./src/database/storage";
+import { hashPassword } from "./src/modules/user/user.controller";
 
 function slugify(text: string): string {
   return text
@@ -10,11 +10,11 @@ function slugify(text: string): string {
     .trim();
 }
 
-const basketballImage = "/attached_assets/generated_images/Basketball_action_featured_post_18bf51a6.png";
-const soccerImage = "/attached_assets/generated_images/Soccer_celebration_post_thumbnail_d7ed8be6.png";
-const baseballImage = "/attached_assets/generated_images/Baseball_pitcher_action_shot_b2e0d44d.png";
-const tennisImage = "/attached_assets/generated_images/Tennis_serve_action_thumbnail_0564dc01.png";
-const avatarImage = "/attached_assets/generated_images/Professional_author_avatar_4f0495ba.png";
+const basketballImage = "/src/assets/generated_images/Basketball_action_featured_post_18bf51a6.png";
+const soccerImage = "/src/assets/generated_images/Soccer_celebration_post_thumbnail_d7ed8be6.png";
+const baseballImage = "/src/assets/generated_images/Baseball_pitcher_action_shot_b2e0d44d.png";
+const tennisImage = "/src/assets/generated_images/Tennis_serve_action_thumbnail_0564dc01.png";
+const avatarImage = "/src/assets/generated_images/Professional_author_avatar_4f0495ba.png";
 
 export async function seedDatabase() {
   console.log("Seeding database...");
