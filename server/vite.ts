@@ -8,6 +8,9 @@ import { nanoid } from "nanoid";
 
 const viteLogger = createLogger();
 
+/**
+ * Logger function for server messages
+ */
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
     hour: "numeric",
@@ -19,6 +22,10 @@ export function log(message: string, source = "express") {
   console.log(`${formattedTime} [${source}] ${message}`);
 }
 
+/**
+ * Setup Vite development server middleware
+ * Used in development mode only
+ */
 export async function setupVite(app: Express, server: Server) {
   const serverOptions = {
     middlewareMode: true,
@@ -52,7 +59,7 @@ export async function setupVite(app: Express, server: Server) {
         "index.html",
       );
 
-      // always reload the index.html file from disk incase it changes
+      // always reload the index.html file from disk in case it changes
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
       template = template.replace(
         `src="/src/main.tsx"`,
@@ -67,6 +74,10 @@ export async function setupVite(app: Express, server: Server) {
   });
 }
 
+/**
+ * Serve static files in production mode
+ * Used in production mode only
+ */
 export function serveStatic(app: Express) {
   const distPath = path.resolve(import.meta.dirname, "public");
 

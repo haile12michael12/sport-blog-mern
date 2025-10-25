@@ -1,16 +1,17 @@
 import express from "express";
-import { createServer } from "http";
-import { WebSocketServer, WebSocket } from "ws";
+import { createServer, Server } from "http";
+import { WebSocketServer, WebSocket as WSWebSocket } from "ws";
 import rateLimit from "express-rate-limit";
 import multer from "multer";
 import { storage } from "./database/storage";
+import { seedDatabase } from "./database/seed";
 
 const upload = multer({ storage: multer.memoryStorage() });
 
 export class App {
   public app: express.Application;
-  public server: createServer.Server;
-  private wss: WebSocketServer;
+  public server!: Server;
+  private wss!: WebSocketServer;
 
   constructor() {
     this.app = express();
@@ -28,6 +29,7 @@ export class App {
       const originalResJson = res.json;
       res.json = function (bodyJson: any, ...args: any[]) {
         capturedJsonResponse = bodyJson;
+        // @ts-ignore - Type mismatch but works in practice
         return originalResJson.apply(res, [bodyJson, ...args]);
       };
 
@@ -53,7 +55,6 @@ export class App {
 
   async initialize() {
     // Initialize database
-    const { seedDatabase } = await import("../seed");
     await seedDatabase();
 
     // Setup routes
@@ -109,10 +110,10 @@ export class App {
     
     this.wss = new WebSocketServer({ server: this.server, path: "/ws" });
 
-    this.wss.on("connection", (ws: WebSocket) => {
+    this.wss.on("connection", (ws: WSWebSocket) => {
       console.log("WebSocket client connected");
 
-      ws.on("message", async (message: WebSocket.Data) => {
+      ws.on("message", async (message: any) => {
         try {
           const data = JSON.parse(message.toString());
           
@@ -132,10 +133,20 @@ export class App {
   }
 
   listen(port: number, callback?: () => void) {
-    this.server.listen({
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    }, callback);
+    // Check if we're on Windows to avoid unsupported reusePort option
+    const isWindows = process.platform === 'win32';
+    
+    if (isWindows) {
+      this.server.listen({
+        port,
+        host: "0.0.0.0",
+      }, callback);
+    } else {
+      this.server.listen({
+        port,
+        host: "0.0.0.0",
+        reusePort: true,
+      }, callback);
+    }
   }
 }

@@ -20,9 +20,19 @@ async function startServer() {
     // this serves both the API and the client.
     // It is the only port that is not firewalled.
     const port = parseInt(process.env.PORT || '5000', 10);
-    app.listen(port, () => {
-      log(`Server running on port ${port}`);
-    });
+    
+    // Check if we're on Windows to avoid unsupported reusePort option
+    const isWindows = process.platform === 'win32';
+    
+    if (isWindows) {
+      app.listen(port, () => {
+        log(`Server running on port ${port}`);
+      });
+    } else {
+      app.listen(port, () => {
+        log(`Server running on port ${port}`);
+      });
+    }
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);

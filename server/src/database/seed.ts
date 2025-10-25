@@ -1,6 +1,9 @@
-import { storage } from "./src/database/storage";
-import { hashPassword } from "./src/modules/user/user.controller";
+import { storage } from "./storage";
+import { hashPassword } from "../modules/user/user.controller";
 
+/**
+ * Utility function to create URL-friendly slugs
+ */
 function slugify(text: string): string {
   return text
     .toLowerCase()
@@ -10,19 +13,31 @@ function slugify(text: string): string {
     .trim();
 }
 
+// Asset paths for seeded content
 const basketballImage = "/src/assets/generated_images/Basketball_action_featured_post_18bf51a6.png";
 const soccerImage = "/src/assets/generated_images/Soccer_celebration_post_thumbnail_d7ed8be6.png";
 const baseballImage = "/src/assets/generated_images/Baseball_pitcher_action_shot_b2e0d44d.png";
 const tennisImage = "/src/assets/generated_images/Tennis_serve_action_thumbnail_0564dc01.png";
 const avatarImage = "/src/assets/generated_images/Professional_author_avatar_4f0495ba.png";
 
+/**
+ * Seeds the database with initial data for development
+ * Checks if data already exists to prevent duplicate seeding
+ */
 export async function seedDatabase() {
-  console.log("Seeding database...");
+  console.log("Checking if database needs seeding...");
+  
+  // Check if database is already seeded by looking for existing users
+  const existingUsers = await storage.getUsers();
+  if (existingUsers.length > 0) {
+    console.log("Database already seeded, skipping...");
+    return;
+  }
 
+  console.log("Seeding database with initial data...");
+
+  // Create admin user
   const adminPassword = await hashPassword("admin123");
-  const authorPassword = await hashPassword("author123");
-  const readerPassword = await hashPassword("reader123");
-
   const admin = await storage.createUser({
     username: "admin",
     email: "admin@sportsblog.com",
@@ -30,9 +45,11 @@ export async function seedDatabase() {
     displayName: "Admin User",
     role: "admin",
   });
-
   await storage.updateUser(admin.id, { avatar: avatarImage, bio: "Sports Blog Administrator" });
 
+  // Create author users
+  const authorPassword = await hashPassword("author123");
+  
   const author1 = await storage.createUser({
     username: "johndoe",
     email: "john@sportsblog.com",
@@ -40,7 +57,6 @@ export async function seedDatabase() {
     displayName: "John Doe",
     role: "author",
   });
-
   await storage.updateUser(author1.id, {
     avatar: avatarImage,
     bio: "Senior Sports Journalist with 10 years of experience covering major leagues.",
@@ -53,12 +69,13 @@ export async function seedDatabase() {
     displayName: "Jane Smith",
     role: "author",
   });
-
   await storage.updateUser(author2.id, {
     avatar: avatarImage,
     bio: "Basketball analyst and former college player. Passionate about the game.",
   });
 
+  // Create reader user
+  const readerPassword = await hashPassword("reader123");
   const reader = await storage.createUser({
     username: "reader",
     email: "reader@sportsblog.com",
@@ -67,6 +84,7 @@ export async function seedDatabase() {
     role: "reader",
   });
 
+  // Create sample posts
   const post1 = await storage.createPost({
     title: "The Rise of Young Stars in Basketball",
     slug: slugify("The Rise of Young Stars in Basketball"),
@@ -88,7 +106,6 @@ Looking ahead, the future of basketball appears brighter than ever. With so many
     isFeatured: true,
     metaDescription: "An in-depth look at how young basketball stars are changing the game with their unique skills and versatility.",
   });
-
   await storage.updatePost(post1.id, { viewCount: 1250, likeCount: 89 });
 
   const post2 = await storage.createPost({
@@ -112,7 +129,6 @@ This match will be studied for years to come. It showcased everything beautiful 
     isFeatured: true,
     metaDescription: "Tactical breakdown of the Champions League final showcasing strategic brilliance from both teams.",
   });
-
   await storage.updatePost(post2.id, { viewCount: 2100, likeCount: 156 });
 
   const post3 = await storage.createPost({
@@ -136,7 +152,6 @@ This evolution is changing baseball at every level. From how players train in th
     isFeatured: false,
     metaDescription: "The modern baseball debate: how analytics and traditional scouting work together to build championship teams.",
   });
-
   await storage.updatePost(post3.id, { viewCount: 890, likeCount: 67 });
 
   const post4 = await storage.createPost({
@@ -160,9 +175,9 @@ Injuries and fatigue are always factors in Grand Slams. The grueling best-of-fiv
     isFeatured: false,
     metaDescription: "Everything you need to know about the upcoming Grand Slam tournament, including favorites and dark horses.",
   });
-
   await storage.updatePost(post4.id, { viewCount: 654, likeCount: 45 });
 
+  // Create sample comments
   await storage.createComment({
     postId: post1.id,
     authorId: reader.id,
@@ -184,6 +199,7 @@ Injuries and fatigue are always factors in Grand Slams. The grueling best-of-fiv
     content: "Thanks! I think the coach-player relationship is crucial to developing young talent properly.",
   });
 
+  // Create sample teams
   await storage.createTeam({
     name: "Los Angeles Lakers",
     slug: slugify("Los Angeles Lakers"),
@@ -200,6 +216,7 @@ Injuries and fatigue are always factors in Grand Slams. The grueling best-of-fiv
     foundedYear: 1878,
   });
 
+  // Create sample players
   await storage.createPlayer({
     name: "LeBron James",
     slug: slugify("LeBron James"),
@@ -209,6 +226,7 @@ Injuries and fatigue are always factors in Grand Slams. The grueling best-of-fiv
     stats: JSON.stringify({ ppg: 27.2, apg: 7.4, rpg: 7.5 }),
   });
 
+  // Create sample live commentary
   await storage.createLiveCommentary({
     matchId: "match-001",
     teamHome: "Lakers",
@@ -231,7 +249,7 @@ Injuries and fatigue are always factors in Grand Slams. The grueling best-of-fiv
     isActive: true,
   });
 
-  console.log("Database seeded successfully!");
+  console.log("Database seeding completed successfully!");
   console.log("\nTest accounts:");
   console.log("Admin: admin@sportsblog.com / admin123");
   console.log("Author: john@sportsblog.com / author123");

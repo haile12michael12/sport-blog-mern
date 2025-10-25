@@ -19,8 +19,7 @@
       "@/*": ["./client/src/*"],
       "@shared/*": ["./client/src/shared/*"],
       "@assets/*": ["./client/src/assets/*"],
-      "@server/*": ["./server/src/*"],
-      "@server-shared/*": ["./server/src/shared/*"]
+      "@server/*": ["./server/src/*"]
     }
   }
 }
