@@ -3,6 +3,29 @@ import { setupVite, serveStatic, log } from "./vite";
 import { createServer } from "http";
 import express from "express";
 
+/**
+ * Finds an available port starting from the preferred port
+ */
+function findAvailablePort(preferredPort: number): Promise<number> {
+  return new Promise((resolve, reject) => {
+    const server = createServer();
+    server.listen(preferredPort, () => {
+      const { port } = server.address() as { port: number };
+      server.close(() => {
+        resolve(port);
+      });
+    });
+    server.on('error', (err: any) => {
+      if (err.code === 'EADDRINUSE') {
+        // Try the next port
+        findAvailablePort(preferredPort + 1).then(resolve).catch(reject);
+      } else {
+        reject(err);
+      }
+    });
+  });
+}
+
 async function startServer() {
   try {
     // Create and initialize the app
@@ -21,50 +44,14 @@ async function startServer() {
       serveStatic(app.app);
     }
 
-    // Start the server with port conflict handling
-    const basePort = parseInt(process.env.PORT || '5000', 10);
-    let port = basePort;
-    const maxPortAttempts = 10;
-
-    const listenOnPort = (portToTry: number): Promise<void> => {
-      return new Promise((resolve, reject) => {
-        const serverInstance = app.listen(portToTry, () => {
-          log(`Server running on port ${portToTry}`);
-          resolve();
-        });
-        
-        serverInstance.on('error', (err: any) => {
-          if (err.code === 'EADDRINUSE') {
-            reject(new Error(`Port ${portToTry} is already in use`));
-          } else {
-            reject(err);
-          }
-        });
-      });
-    };
-
-    // Try to listen on the base port first, then try alternatives
-    try {
-      await listenOnPort(port);
-    } catch (portError) {
-      log(`Port ${port} is in use, trying alternative ports...`);
-      
-      let foundPort = false;
-      for (let i = 1; i < maxPortAttempts; i++) {
-        const alternativePort = basePort + i;
-        try {
-          await listenOnPort(alternativePort);
-          foundPort = true;
-          break;
-        } catch (err) {
-          // Continue trying the next port
-        }
-      }
-      
-      if (!foundPort) {
-        throw new Error(`Could not find an available port after ${maxPortAttempts} attempts`);
-      }
-    }
+    // Find an available port starting from the preferred port
+    const preferredPort = parseInt(process.env.PORT || '5000', 10);
+    const availablePort = await findAvailablePort(preferredPort);
+    
+    // Start the server on the available port
+    app.listen(availablePort, () => {
+      log(`Server running on port ${availablePort}`);
+    });
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);
